@@ -25,7 +25,9 @@ class Data(db.Model):
 @app.route('/index')
 @app.route('/home')
 def index():
-    return render_template('/index.html', title='Home')
+    all_data = Data.query.all()
+
+    return render_template('/index.html', title='Home', employees = all_data)
 
 
 @app.route('/about')
@@ -57,6 +59,31 @@ def insert():
         flash("Employee inserted successfully")
 
         return redirect(url_for('index'))
+
+@app.route('/update', methods=['GET','POST'])
+def update():
+    if request.method == 'POST':
+        my_data = Data.query.get(request.form.get('id'))  # this is the hidden id created in index.html
+
+        my_data.name = request.form['name']
+        my_data.email = request.form['email']
+        my_data.phone = request.form['phone']
+
+        db.session.commit()
+        flash("Employee List Updated Successfully!")
+
+        return redirect(url_for('index'))
+
+@app.route('/delete/<id>', methods=['GET', 'POST'])
+def delete(id):
+    my_data = Data.query.get(id)
+    db.session.delete(my_data)
+    db.session.commit()
+    flash('Employee Deleted Successfully!')
+
+    return redirect(url_for('index'))
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
